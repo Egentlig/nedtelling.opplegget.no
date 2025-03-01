@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            font-size: 25vw; /* Adjust size based on viewport width */
+            text-align: center;
+            white-space: nowrap; /* Prevents text from breaking */
+        }
+    </style>
+    <title>Nedtelling</title>
+</head>
+<body>
+
+<h1 id="timer"></h1>
+
+<script type="application/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const startTimestamp = urlParams.get("start");
+        const timerMinutes = urlParams.get("minutes");
+
+        const timerText = document.querySelector("#timer");
+
+        setInterval(() => {
+            const start = new Date(startTimestamp).getTime();
+            const now = new Date().getTime();
+            const end = start + (timerMinutes * 60 * 1000);
+
+            // get total seconds between the times
+            var delta = Math.abs(end - now) / 1000;
+
+            // calculate (and subtract) whole hours
+            var hours = Math.floor(delta / 3600) % 24;
+            delta -= hours * 3600;
+
+            // calculate (and subtract) whole minutes
+            var minutes = Math.floor(delta / 60) % 60;
+            delta -= minutes * 60;
+
+            // what's left is seconds
+            var seconds = Math.floor(delta % 60);  // in theory the modulus is not required
+
+            timerText.innerText = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        }, 1000);
+    });
+</script>
+</body>
+</html>
