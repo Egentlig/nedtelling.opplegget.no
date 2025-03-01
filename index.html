@@ -22,39 +22,50 @@
 <h1 id="timer"></h1>
 
 <script type="application/javascript">
-    document.addEventListener("DOMContentLoaded", () => {
+    function getQueryParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
-        const startTimestamp = urlParams.get("start");
-        const timerMinutes = parseInt(urlParams.get("minutes"), 10); // Convert to integer
+        return urlParams.get(param);
+    }
+
+    function startCountdown() {
+        const startTimestamp = getQueryParam("start");
+        const timerMinutes = parseInt(getQueryParam("minutes"), 10);
 
         const timerText = document.querySelector("#timer");
 
+        // Validate parameters
         if (!startTimestamp || isNaN(timerMinutes)) {
-            timerText.innerText = "Invalid start time or duration!";
-        } else {
-            setInterval(() => {
-                const start = new Date(startTimestamp).getTime();
-                const now = new Date().getTime();
-                const end = start + timerMinutes * 60 * 1000;
-
-                if (now > end) {
-                    timerText.innerText = "00:00:00"; // Countdown ended
-                    return;
-                }
-
-                // Calculate remaining time
-                let delta = Math.abs(end - now) / 1000;
-                let hours = Math.floor(delta / 3600) % 24;
-                delta -= hours * 3600;
-                let minutes = Math.floor(delta / 60) % 60;
-                delta -= minutes * 60;
-                let seconds = Math.floor(delta % 60);
-
-                // Update timer display
-                timerText.innerText = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-            }, 1000);
+            timerText.innerText = "Invalid or missing parameters!";
+            return;
         }
-    });
+
+        const startTime = new Date(startTimestamp).getTime();
+        const endTime = startTime + timerMinutes * 60 * 1000;
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const timeLeft = Math.max(0, endTime - now); // Ensure non-negative time
+
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            timerText.innerText =
+                `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                timerText.innerText = "00:00:00"; // Display zero when finished
+            }
+        }
+
+        // Update every second
+        updateTimer();
+        const countdownInterval = setInterval(updateTimer, 1000);
+    }
+
+    // Start the countdown when the page loads
+    startCountdown();
 </script>
 </body>
 </html>
